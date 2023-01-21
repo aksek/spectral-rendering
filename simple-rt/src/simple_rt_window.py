@@ -18,4 +18,5 @@ class SimpleRTWindow(BaseWindowConfig):
     def render(self, time: float, frame_time: float):
         self.ctx.clear(0.8, 0.8, 0.8, 0.0)
         self.ctx.enable(moderngl.DEPTH_TEST | moderngl.CULL_FACE)
+        self.program['res'].write(pyrr.Vector3((self.window_size[0], self.window_size[1], 0), dtype='f4'))
         self.vao_sphere.render()

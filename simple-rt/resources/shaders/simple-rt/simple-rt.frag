@@ -5,6 +5,8 @@ in vec3 fragPosition;
 out vec4 fragColor;
 
 uniform vec3 res;
+uniform vec3 cameraPosition;
+uniform mat3 cameraRotation;
 
 struct Light
 {
@@ -69,8 +71,8 @@ void main()
 
     Light light;
     light.position = vec3(-1, 5, -1);
-    light.color = vec3(0.0, 1.0, 1.0);
-    light.intensity = 0.9;
+    light.color = vec3(1.0, 1.0, 1.0);
+    light.intensity = 0.99;
 
     // normalized pixel coordinates (from 0 to 1)
     vec2 uv = gl_FragCoord.xy / resolution.xy;
@@ -78,10 +80,8 @@ void main()
 	uv = uv * 2.0 - 1.0; // transform from [0,1] to [-1,1]
     uv.x *= resolution.x / resolution.y; // aspect fix
 
-    vec3 cameraPosition = vec3(0.0, 1.0, -4.0);
-    vec3 cameraTarget = vec3(0.0, 0.0, 0.0);
-    mat3 cameraRotation = mat3(vec3(1, 0, 0), vec3(0, 1, 0), vec3(0, 0, 1));
-//    vec3 cameraDirection = normalize(cameraTarget - cameraPosition);
+    //mat3 cameraRotation = mat3(vec3(1, 0, 0), vec3(0, 1, 0), vec3(0, 0, 1));
+    //vec3 cameraDirection = normalize(cameraTarget - cameraPosition);
 
     vec3 cameraDirection = toViewport(resolution);
     cameraDirection = multiplyMatrixAndVector(cameraRotation, cameraDirection);

@@ -100,6 +100,7 @@ void main()
 
 vec3 traceRay(vec3 rayOrigin, vec3 rayVector, Triangle triangles[4], Light light, int hitNumber) {
     float INFTY = 9999;
+    float EPSILON = 0.0001;
 
     vec3 color = vec3(0);
     for (int j = hitNumber; j >= 0; j--) {
@@ -107,23 +108,23 @@ vec3 traceRay(vec3 rayOrigin, vec3 rayVector, Triangle triangles[4], Light light
         HitData detectedHit;
         detectedHit.rayLength = INFTY;
         for (int i = 0; i < 4; i++) {
-            HitData hitResult = TriangleRayIntersection(rayOrigin, rayVector, triangles[i]);
+            HitData hitResult = TriangleRayIntersection(rayOrigin + EPSILON * rayVector, rayVector, triangles[i]);
             if (hitResult.rayLength < detectedHit.rayLength) {
                 detectedHit = hitResult;
             }
         }
-        if (detectedHit.rayLength == INFTY) return vec3(0);
+        if (detectedHit.rayLength == INFTY) break;
 
         vec3 lightVector = light.position - detectedHit.pointHit;
-//        HitData detectedShadowHit;
-//        detectedShadowHit.rayLength = INFTY;
-//        for (int i = 0; i < 4; i++) {
-//            HitData shadowRayHit = TriangleRayIntersection(detectedHit.pointHit, lightVector, triangles[i]);
-//            if (shadowRayHit.rayLength < detectedShadowHit.rayLength) {
-//                detectedShadowHit = shadowRayHit;
-//            }
-//        }
-//        if (detectedShadowHit.rayLength < length(lightVector)) return vec3(0.2);
+        HitData detectedShadowHit;
+        detectedShadowHit.rayLength = INFTY;
+        for (int i = 0; i < 4; i++) {
+            HitData shadowRayHit = TriangleRayIntersection(detectedHit.pointHit + EPSILON * lightVector, lightVector, triangles[i]);
+            if (shadowRayHit.rayLength < detectedShadowHit.rayLength) {
+                detectedShadowHit = shadowRayHit;
+            }
+        }
+        if (detectedShadowHit.rayLength < length(lightVector)) break;
 
         float diff = max(dot(detectedHit.normal, -lightVector), 0.0);
         vec3 diffuse = diff * light.intensity * light.color / length(lightVector);
@@ -176,9 +177,11 @@ HitData TriangleRayIntersection(vec3 rayOrigin, vec3 rayVector, Triangle triangl
 			{
 				float resultRayLength = f * dot(edge2, q);
 
-                result.rayLength = resultRayLength;
-                result.normal = normalize(cross(edge1, edge2));
-                result.pointHit = rayOrigin + rayVector * resultRayLength;
+                if (resultRayLength > 0) {
+                    result.rayLength = resultRayLength;
+                    result.normal = normalize(cross(edge1, edge2));
+                    result.pointHit = rayOrigin + rayVector * resultRayLength;
+                }
 			}
 		}
 	}

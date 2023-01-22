@@ -1,5 +1,7 @@
 #version 330
 
+#define N_TRIANGLES 8
+
 in vec3 fragPosition;
 
 out vec4 fragColor;
@@ -34,7 +36,7 @@ struct HitData
 };
 
 HitData TriangleRayIntersection(vec3 rayOrigin, vec3 rayVector, Triangle triangle);
-vec3 traceRay(vec3 rayOrigin, vec3 rayVector, Triangle triangles[4], Light light, int hitNumber);
+vec3 traceRay(vec3 rayOrigin, vec3 rayVector, Triangle triangles[N_TRIANGLES], Light light, int hitNumber);
 vec3 multiplyMatrixAndVector(mat3 mat, vec3 vec);
 vec3 toViewport(vec2 resolution);
 
@@ -62,9 +64,38 @@ void main()
     wall3.vertex1 = vec3(-2, 0, -2);
     wall3.vertex2 = vec3(-1, 3, -1);
 
-    int nTriangles = 4;
-    Triangle quadrangle[4] = Triangle[4] (
-        base, wall1, wall2, wall3
+    Triangle wall4;
+    wall4.vertex0 = vec3(-3, 0, 2);
+    wall4.vertex1 = vec3(-3, 0, -2);
+    wall4.vertex2 = vec3(-3, 3, -1);
+
+    Triangle base1;
+    base.vertex0 = vec3(-5, 0, -2);
+    base.vertex1 = vec3(-2, 0, -2);
+    base.vertex2 = vec3(-5, 0, 2);
+
+    Triangle wall11;
+    wall11.vertex0 = vec3(-5, 0, -2);
+    wall11.vertex1 = vec3(-2, 0, -2);
+    wall11.vertex2 = vec3(-4, 3, -1);
+
+    Triangle wall21;
+    wall21.vertex0 = vec3(-2, 0, -2);
+    wall21.vertex1 = vec3(-5, 0, 2);
+    wall21.vertex2 = vec3(-4, 3, -1);
+
+    Triangle wall31;
+    wall31.vertex0 = vec3(-5, 0, 2);
+    wall31.vertex1 = vec3(-5, 0, -2);
+    wall31.vertex2 = vec3(-4, 3, -1);
+
+    Triangle wall41;
+    wall41.vertex0 = vec3(-6, 0, 2);
+    wall41.vertex1 = vec3(-6, 0, -2);
+    wall41.vertex2 = vec3(-6, 3, -1);
+
+    Triangle quadrangle[N_TRIANGLES] = Triangle[N_TRIANGLES] (
+        base, wall1, wall2, wall3, base1, wall11, wall21, wall31
     );
 
     Light light;
@@ -78,7 +109,7 @@ void main()
 	uv = uv * 2.0 - 1.0; // transform from [0,1] to [-1,1]
     uv.x *= resolution.x / resolution.y; // aspect fix
 
-    vec3 cameraPosition = vec3(0.0, 1.0, -4.0);
+    vec3 cameraPosition = vec3(-3.0, 1.0, -5.0);
     vec3 cameraTarget = vec3(0.0, 0.0, 0.0);
     mat3 cameraRotation = mat3(vec3(1, 0, 0), vec3(0, 1, 0), vec3(0, 0, 1));
 //    vec3 cameraDirection = normalize(cameraTarget - cameraPosition);
@@ -86,7 +117,7 @@ void main()
     vec3 cameraDirection = toViewport(resolution);
     cameraDirection = multiplyMatrixAndVector(cameraRotation, cameraDirection);
 
-    int hitNumber = 10;
+    int hitNumber = 5;
     vec3 rayStartingPositon = cameraPosition;
     vec3 rayDirection = normalize(cameraDirection + vec3(uv, 0));
 
@@ -94,7 +125,7 @@ void main()
     fragColor = vec4(color, 1);
 }
 
-vec3 traceRay(vec3 rayOrigin, vec3 rayVector, Triangle triangles[4], Light light, int hitNumber) {
+vec3 traceRay(vec3 rayOrigin, vec3 rayVector, Triangle triangles[N_TRIANGLES], Light light, int hitNumber) {
     float INFTY = 9999;
     float EPSILON = 0.0001;
 
@@ -103,7 +134,7 @@ vec3 traceRay(vec3 rayOrigin, vec3 rayVector, Triangle triangles[4], Light light
 
         HitData detectedHit;
         detectedHit.rayLength = INFTY;
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < N_TRIANGLES; i++) {
             HitData hitResult = TriangleRayIntersection(rayOrigin + EPSILON * rayVector, rayVector, triangles[i]);
             if (hitResult.rayLength < detectedHit.rayLength) {
                 detectedHit = hitResult;
@@ -114,7 +145,7 @@ vec3 traceRay(vec3 rayOrigin, vec3 rayVector, Triangle triangles[4], Light light
         vec3 lightVector = light.position - detectedHit.pointHit;
         HitData detectedShadowHit;
         detectedShadowHit.rayLength = INFTY;
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < N_TRIANGLES; i++) {
             HitData shadowRayHit = TriangleRayIntersection(detectedHit.pointHit + EPSILON * lightVector, lightVector, triangles[i]);
             if (shadowRayHit.rayLength < detectedShadowHit.rayLength) {
                 detectedShadowHit = shadowRayHit;
@@ -130,10 +161,16 @@ vec3 traceRay(vec3 rayOrigin, vec3 rayVector, Triangle triangles[4], Light light
         float spec = pow(max(dot(rayVector, reflectedVector), 0.0), 32);
         vec3 specular = light.color * light.intensity * spec;
 
+        light.position = rayOrigin;
+        light.intensity = light.intensity * 0.8;
+
         rayOrigin = detectedHit.pointHit;
         rayVector = reflectedVector;
 
-        color += (j+1)/(hitNumber+1) * (diffuse + specular);
+
+//        color += int(j==4) * (diffuse + specular);
+//        color += (j+1)/(hitNumber+1) * (diffuse + specular);
+        color += diffuse + specular;
     }
 
     return color;

@@ -32,28 +32,28 @@ void main()
     vec2 resolution = vec2(res);
 
     Triangle base;
-    base.vertex0 = vec3(0, 0, -0.5);
-    base.vertex1 = vec3(0.5, 0, -1);
-    base.vertex2 = vec3(0, 0.5, -1);
+    base.vertex0 = vec3(0, 0, 0.5);
+    base.vertex1 = vec3(0.5, 0, 1);
+    base.vertex2 = vec3(0, 0.5, 1);
 
-//    Triangle wall1;
-//    wall1.vertex0 = vec3(0, 0, 0);
-//    wall1.vertex1 = vec3(0, 0, 1);
-//    wall1.vertex2 = vec3(0.5, 1, 0.5);
-//
-//    Triangle wall2;
-//    wall2.vertex0 = vec3(0, 0, 1);
-//    wall2.vertex1 = vec3(-1, 0, 1);
-//    wall2.vertex2 = vec3(0.5, 1, 0.5);
-//
-//    Triangle wall3;
-//    wall3.vertex0 = vec3(0, 0, 0);
-//    wall3.vertex1 = vec3(-1, 0, 1);
-//    wall3.vertex2 = vec3(0.5, 1, 0.5);
-//
-//    Triangle quadrangle[4] = Triangle[4] (
-//        base, wall1, wall2, wall3
-//    );
+    Triangle wall1;
+    wall1.vertex0 = vec3(-1, 0, 0.5);
+    wall1.vertex1 = vec3(0.5, 0, 1);
+    wall1.vertex2 = vec3(0, 0.5, 1);
+
+    Triangle wall2;
+    wall2.vertex0 = vec3(0, 0, 1);
+    wall2.vertex1 = vec3(-1, 0, 1);
+    wall2.vertex2 = vec3(0.5, 1, 0.5);
+
+    Triangle wall3;
+    wall3.vertex0 = vec3(0, 0, 1);
+    wall3.vertex1 = vec3(-1, 0, 1);
+    wall3.vertex2 = vec3(0.5, 1, 0.5);
+
+    Triangle quadrangle[4] = Triangle[4] (
+        base, wall1, wall2, wall3
+    );
 
     vec3 lightPosition = vec3(1, 1, -5);
     vec3 lightColor = vec3(1, 0.5, 1);
@@ -73,20 +73,20 @@ void main()
 
     HitData detectedHit;
     detectedHit.rayLength = 9999.0;
-//    for (int i = 0; i < 1; i++) {
-        HitData hitResult = TriangleRayIntersection(rayStartingPositon, rayDirection, base);
+    for (int i = 0; i < 1; i++) {
+        HitData hitResult = TriangleRayIntersection(rayStartingPositon, rayDirection, quadrangle[i]);
         if (hitResult.rayLength < detectedHit.rayLength) {
-            detectedHit.rayLength = hitResult.rayLength;
+            detectedHit = hitResult;
         }
-//    }
-//    if (detectedHit.rayLength < 9999) {
-//        fragColor = vec4(0, 1, 0, 1);
+    }
+//    if (detectedHit.normal != vec3(0)) {
+//        fragColor = vec4(detectedHit.normal, 1);
 //    } else {
 //        fragColor = vec4(1, 0, 0, 1);
 //    }
 
     if (detectedHit.rayLength < 9999.0) {
-        fragColor = vec4(detectedHit.normal, 1.0);
+//        fragColor = vec4(1, 0, 0, 1.0);
          vec3 pointHit = (rayStartingPositon + rayDirection * detectedHit.rayLength);
          float diff = max(dot(detectedHit.normal, rayDirection), 0.0);
          vec3 diffuse = diff * lightColor;
@@ -190,7 +190,7 @@ HitData TriangleRayIntersection(vec3 rayOrigin, vec3 rayVector, Triangle triangl
 				float resultRayLength = f * dot(edge2, q);
 
                 result.rayLength = resultRayLength;
-                result.normal = cross(edge1, edge2);
+                result.normal = normalize(cross(edge1, edge2));
 			}
 		}
 	}

@@ -1,6 +1,6 @@
 #version 330
 
-#define N_TRIANGLES 8
+#define N_TRIANGLES 10
 
 in vec3 fragPosition;
 
@@ -96,14 +96,24 @@ void main()
     wall41.vertex1 = vec3(-6, 0, -2);
     wall41.vertex2 = vec3(-6, 3, -1);
 
+    Triangle plane;
+    plane.vertex0 = vec3(-20, -1, -20);
+    plane.vertex1 = vec3( 20, -1, -20);
+    plane.vertex2 = vec3(-20, -1,  20);
+
+    Triangle plane2;
+    plane2.vertex0 = vec3( 20, -1,  20);
+    plane2.vertex1 = vec3(  0, 40,  20);
+    plane2.vertex2 = vec3(-20, -1,  20);
+
     Triangle quadrangle[N_TRIANGLES] = Triangle[N_TRIANGLES] (
-        base, wall1, wall2, wall3, base1, wall11, wall21, wall31
+        base, wall1, wall2, wall3, base1, wall11, wall21, wall31, plane, plane2
     );
 
     Light light;
-    light.position = vec3(-1, 5, -1);
+    light.position = vec3(-3.5, 2, 2);
     light.color = vec3(0.0, 1.0, 1.0);
-    light.intensity = 0.9;
+    light.intensity = 2;
 
     // normalized pixel coordinates (from 0 to 1)
     vec2 uv = gl_FragCoord.xy / resolution.xy;
@@ -129,6 +139,8 @@ vec3 traceRay(vec3 rayOrigin, vec3 rayVector, Triangle triangles[N_TRIANGLES], L
     float INFTY = 9999;
     float EPSILON = 0.0001;
 
+    vec3 ambient = vec3(0.01, 0.01, 0.05);
+
     vec3 color = vec3(0);
     for (int j = hitNumber; j >= 0; j--) {
 
@@ -140,7 +152,9 @@ vec3 traceRay(vec3 rayOrigin, vec3 rayVector, Triangle triangles[N_TRIANGLES], L
                 detectedHit = hitResult;
             }
         }
-        if (detectedHit.rayLength == INFTY) break;
+        if (detectedHit.rayLength == INFTY) {
+            break;
+        }
 
         vec3 lightVector = light.position - detectedHit.pointHit;
         HitData detectedShadowHit;
@@ -151,26 +165,29 @@ vec3 traceRay(vec3 rayOrigin, vec3 rayVector, Triangle triangles[N_TRIANGLES], L
                 detectedShadowHit = shadowRayHit;
             }
         }
-        if (detectedShadowHit.rayLength < length(lightVector)) break;
+        if (detectedShadowHit.rayLength < length(lightVector)) {
+            color += ambient;
+            break;
+        }
 
-        float diff = max(dot(detectedHit.normal, -lightVector), 0.0);
+        float diff = max(dot(detectedHit.normal, normalize(-lightVector)), 0.0);
         vec3 diffuse = diff * light.intensity * light.color / length(lightVector);
 
-        vec3 reflectedVector = reflect(-rayVector, detectedHit.normal);
+        vec3 reflectedVector = reflect(normalize(lightVector), detectedHit.normal);
 
-        float spec = pow(max(dot(rayVector, reflectedVector), 0.0), 32);
+        float spec = pow(max(dot(-rayVector, -reflectedVector), 0.0), 32);
         vec3 specular = light.color * light.intensity * spec;
+        specular = vec3(0);
 
-        light.position = rayOrigin;
-        light.intensity = light.intensity * 0.8;
+//        color += int(j==0) * (diffuse + specular);
+//        color += (j+1)/(hitNumber+1) * (diffuse + specular);
+        color += (diffuse + specular + ambient) * dot(detectedHit.normal, reflectedVector);
+
+//        light.position = rayOrigin;
+        light.intensity = light.intensity * 0.5;
 
         rayOrigin = detectedHit.pointHit;
         rayVector = reflectedVector;
-
-
-//        color += int(j==4) * (diffuse + specular);
-//        color += (j+1)/(hitNumber+1) * (diffuse + specular);
-        color += diffuse + specular;
     }
 
     return color;

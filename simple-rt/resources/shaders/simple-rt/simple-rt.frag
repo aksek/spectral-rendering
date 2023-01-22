@@ -4,7 +4,14 @@ in vec3 fragPosition;
 
 out vec4 fragColor;
 
-uniform vec2 resolution;
+uniform vec3 res;
+
+struct Light
+{
+    vec3 position;
+    vec3 color;
+    float intensity;
+};
 
 struct Triangle
 {
@@ -23,21 +30,25 @@ struct HitData
 {
 	float rayLength;
 	vec3 normal;
+    vec3 pointHit;
 };
 
 HitData TriangleRayIntersection(vec3 rayOrigin, vec3 rayVector, Triangle triangle);
+vec3 traceRay(vec3 rayOrigin, vec3 rayVector, Triangle triangles[4], Light light, int hitNumber);
 
 void main()
 {
+    vec2 resolution = vec2(res);
+
     Triangle base;
-    base.vertex0 = vec3(0, 0, 0);
-    base.vertex1 = vec3(0, 0, 1);
-    base.vertex2 = vec3(-1, 0, 1);
+    base.vertex0 = vec3(0, 0, 0.5);
+    base.vertex1 = vec3(0.5, 0, 1);
+    base.vertex2 = vec3(0, 0.5, 1);
 
     Triangle wall1;
-    wall1.vertex0 = vec3(0, 0, 0);
-    wall1.vertex1 = vec3(0, 0, 1);
-    wall1.vertex2 = vec3(0.5, 1, 0.5);
+    wall1.vertex0 = vec3(-1, 0, 0.5);
+    wall1.vertex1 = vec3(0.5, 0, 1);
+    wall1.vertex2 = vec3(0, 0.5, 1);
 
     Triangle wall2;
     wall2.vertex0 = vec3(0, 0, 1);
@@ -45,7 +56,7 @@ void main()
     wall2.vertex2 = vec3(0.5, 1, 0.5);
 
     Triangle wall3;
-    wall3.vertex0 = vec3(0, 0, 0);
+    wall3.vertex0 = vec3(0, 0, 1);
     wall3.vertex1 = vec3(-1, 0, 1);
     wall3.vertex2 = vec3(0.5, 1, 0.5);
 
@@ -53,11 +64,13 @@ void main()
         base, wall1, wall2, wall3
     );
 
-    vec3 lightPosition = vec3(4, 4, -6);
-    vec3 lightColor = vec3(1, 1, 1);
+    Light light;
+    light.position = vec3(1, 1, -1);
+    light.color = vec3(1, 0.5, 1);
+    light.intensity = 0.1;
 
     // normalized pixel coordinates (from 0 to 1)
-    vec2 uv = fragPosition.xy / resolution.xy;
+    vec2 uv = gl_FragCoord.xy / resolution.xy;
     
 	uv = uv * 2.0 - 1.0; // transform from [0,1] to [-1,1]
     uv.x *= resolution.x / resolution.y; // aspect fix
@@ -66,30 +79,69 @@ void main()
     vec3 cameraTarget = vec3(0.0, 0.0, 1.0);
     vec3 cameraDirection = normalize(cameraTarget - cameraPosition);
 
+    int hitNumber = 0;
     vec3 rayStartingPositon = cameraPosition;
     vec3 rayDirection = normalize(cameraDirection + vec3(uv, 0));
 
-    HitData detectedHit;
-    detectedHit.rayLength = 9999.0;
-    for (int i = 0; i < 4; i++) {
-        HitData hitResult = TriangleRayIntersection(rayStartingPositon, rayDirection, quadrangle[i]);
-        if (detectedHit.rayLength < hitResult.rayLength) {
-            detectedHit.rayLength = hitResult.rayLength;
+    vec3 color = traceRay(rayStartingPositon, rayDirection, quadrangle, light, hitNumber);
+    fragColor = vec4(color, 1);
+//
+//    if (detectedHits[hitNumber - 1].rayLength < 9999.0) {
+////         vec3 pointHit = (rayStartingPositon + rayDirection * detectedHit.rayLength);
+//         float diff = max(dot(detectedHits[hitNumber - 1].normal, rayDirection), 0.0);
+//         vec3 diffuse = diff * lightColor;
+//         fragColor = vec4(diffuse, 1.0);
+//    }
+//    else {
+//        fragColor = vec4(1.0, 1.0, 1.0, 1.0);
+//    }
+
+}
+
+vec3 traceRay(vec3 rayOrigin, vec3 rayVector, Triangle triangles[4], Light light, int hitNumber) {
+    float INFTY = 9999;
+
+    vec3 color = vec3(0);
+    for (int j = hitNumber; j >= 0; j--) {
+
+        HitData detectedHit;
+        detectedHit.rayLength = INFTY;
+        for (int i = 0; i < 4; i++) {
+            HitData hitResult = TriangleRayIntersection(rayOrigin, rayVector, triangles[i]);
+            if (hitResult.rayLength < detectedHit.rayLength) {
+                detectedHit = hitResult;
+            }
         }
+        if (detectedHit.rayLength == INFTY) return vec3(0);
+
+        vec3 lightVector = light.position - detectedHit.pointHit;
+//        HitData detectedShadowHit;
+//        detectedShadowHit.rayLength = INFTY;
+//        for (int i = 0; i < 4; i++) {
+//            HitData shadowRayHit = TriangleRayIntersection(detectedHit.pointHit, lightVector, triangles[i]);
+//            if (shadowRayHit.rayLength < detectedShadowHit.rayLength) {
+//                detectedShadowHit = shadowRayHit;
+//            }
+//        }
+//        if (detectedShadowHit.rayLength < length(lightVector)) return vec3(0.2);
+
+        float diff = max(dot(detectedHit.normal, -lightVector), 0.0);
+        vec3 diffuse = diff * light.intensity * light.color / length(lightVector);
+
+        vec3 reflectedVector = 2 * dot(rayVector, detectedHit.normal) * detectedHit.normal - rayVector;
+        vec3 specular = vec3(0);
+        float rayDotReflected = dot(rayVector, reflectedVector);
+        if (rayDotReflected > 0) {
+            specular = light.color * light.intensity * pow(rayDotReflected / length(reflectedVector) * length(lightVector), 2);
+        }
+
+        rayOrigin = detectedHit.pointHit;
+        rayVector = reflectedVector;
+
+        color += diffuse + specular;
     }
-    
-    vec3 diffuse = vec3(0);
-    if (detectedHit.rayLength < 9999.0) {
-        fragColor = vec4(1.0, 1.0, 0.0, 1.0);
-        // vec3 pointHit = (rayStartingPositon + rayDirection * detectedHit.rayLength);
-        // float diff = max(dot(detectedHit.normal, rayDirection), 0.0);
-        // vec3 diffuse = diff * lightColor;
-        // fragColor = vec4(diffuse, 1.0);
-    }
-    else {
-        fragColor = vec4(1.0, 1.0, 1.0, 1.0);
-    }
-    
+
+    return color;
 }
 
 HitData TriangleRayIntersection(vec3 rayOrigin, vec3 rayVector, Triangle triangle)
@@ -125,7 +177,8 @@ HitData TriangleRayIntersection(vec3 rayOrigin, vec3 rayVector, Triangle triangl
 				float resultRayLength = f * dot(edge2, q);
 
                 result.rayLength = resultRayLength;
-                result.normal = cross(edge1, edge2);
+                result.normal = normalize(cross(edge1, edge2));
+                result.pointHit = rayOrigin + rayVector * resultRayLength;
 			}
 		}
 	}

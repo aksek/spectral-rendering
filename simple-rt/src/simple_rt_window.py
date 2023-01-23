@@ -10,8 +10,8 @@ class SimpleRTWindow(BaseWindowConfig):
 
     def __init__(self, **kwargs):
         super(SimpleRTWindow, self).__init__(**kwargs)
-        self.obj_sphere = self.load_scene('sphere.obj')
-        self.vao_sphere = self.obj_sphere.root_nodes[0].mesh.vao.instance(self.program)
+        self.obj_model = self.load_scene(self.model_path)
+        self.vao_sphere = self.obj_model.root_nodes[0].mesh.vao.instance(self.program)
         self.camera_location = (0.0, 1.0, -4.0)
         self.camera_rotation_x = (1.0, 0.0, 0.0)
         self.camera_rotation_y = (0.0, 1.0, 0.0)

@@ -12,12 +12,12 @@ out vec4 fragColor;
 
 uniform vec3 res;
 uniform vec3 cameraPosition;
-uniform vec3 cameraAngle;
 
-uniform float leftTetrahedronColor[N_BUCKETS];
-uniform float rightTetrahedronColor[N_BUCKETS];
-uniform float wallsColor[N_BUCKETS];
-uniform float lightColor[N_BUCKETS];
+uniform float cameraAngle;
+uniform float[N_BUCKETS] leftTetrahedronColor;
+uniform float[N_BUCKETS] rightTetrahedronColor;
+uniform float[N_BUCKETS] wallsColor;
+uniform float[N_BUCKETS] lightColor;
 
 struct Light
 {
@@ -163,6 +163,7 @@ void main()
     mat3 K = mat3(vec3(0, 0, 1), vec3(0, 0, 0), vec3(-1,0, 0));
     mat3 cameraRotation = cos(radians(cameraAngle[0])) * I + (1 - cos(radians(cameraAngle[0]))) * outerProduct(u, u) + sin(radians(cameraAngle[0])) * uMatrix;
     // mat3 cameraRotation = K + sin(radians(cameraAngle[0])) * K + (1 - cos(radians(cameraAngle[0]))) * matrixCompMult(K, K);
+
 
     vec3 cameraDirection = normalize(toViewport(resolution));
     cameraDirection = multiplyMatrixAndVector(cameraRotation, cameraDirection);

@@ -1,5 +1,8 @@
 #version 330
 
+#define EPSILON 0.00001f
+#define INFTY 9999
+
 #define N_TRIANGLES 10
 #define N_BUCKETS 10
 
@@ -135,7 +138,7 @@ void main()
     );
 
     Light light;
-    light.position = vec3(-3.5, 2, 2);
+    light.position = vec3(-3.5, 5, -5);
     light.color = float[N_BUCKETS] (1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
     light.intensity = 2;
 
@@ -151,20 +154,17 @@ void main()
     vec3 cameraDirection = toViewport(resolution);
     cameraDirection = multiplyMatrixAndVector(cameraRotation, cameraDirection);
 
-    int hitNumber = 5;
+    int hitNumber = 10;
     vec3 rayStartingPositon = cameraPosition;
     vec3 rayDirection = normalize(cameraDirection + vec3(uv, 0));
 
     float[N_BUCKETS] bucketColor = traceRay(rayStartingPositon, rayDirection, tetrahedron, light, hitNumber);
+
     vec3 color = bucketsToRGB(bucketColor);
-    color = wavelengthToRGB(780);
     fragColor = vec4(color, 1);
 }
 
 float[N_BUCKETS] traceRay(vec3 rayOrigin, vec3 rayVector, Triangle triangles[N_TRIANGLES], Light light, int hitNumber) {
-    float INFTY = 9999;
-    float EPSILON = 0.0001;
-
     vec3 ambient = vec3(0.01, 0.01, 0.05);
 
     float[N_BUCKETS] color = float[N_BUCKETS](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -183,6 +183,8 @@ float[N_BUCKETS] traceRay(vec3 rayOrigin, vec3 rayVector, Triangle triangles[N_T
         }
 
         vec3 lightVector = light.position - detectedHit.pointHit;
+        float shadowRayLength = length(lightVector);
+        lightVector = normalize(lightVector);
         HitData detectedShadowHit;
         detectedShadowHit.rayLength = INFTY;
         for (int i = 0; i < N_TRIANGLES; i++) {
@@ -191,15 +193,15 @@ float[N_BUCKETS] traceRay(vec3 rayOrigin, vec3 rayVector, Triangle triangles[N_T
                 detectedShadowHit = shadowRayHit;
             }
         }
-        if (detectedShadowHit.rayLength < length(lightVector)) {
+        if (detectedShadowHit.rayLength < shadowRayLength) {
 //            color += ambient;
             break;
         }
 
         float diff = max(dot(detectedHit.normal, normalize(-lightVector)), 0.0);
-//        vec3 diffuse = diff * light.intensity * light.color * detectedHit.materialColor / length(lightVector);
+//        vec3 diffuse = diff * light.intensity * light.color * detectedHit.materialColor / shadowRayLength;
         float[N_BUCKETS] diffuse = bucketMul(light.color, detectedHit.materialColor);
-        diffuse = bucketMul(diffuse, diff * light.intensity / length(lightVector));
+        diffuse = bucketMul(diffuse, diff * light.intensity / shadowRayLength);
 
         vec3 reflectedVector = reflect(normalize(lightVector), detectedHit.normal);
 
@@ -213,13 +215,16 @@ float[N_BUCKETS] traceRay(vec3 rayOrigin, vec3 rayVector, Triangle triangles[N_T
 //        color += (j+1)/(hitNumber+1) * (diffuse + specular);
 //        color += (diffuse + specular + ambient) * dot(detectedHit.normal, reflectedVector);
         float[N_BUCKETS] currentColor = bucketAdd(diffuse, specular);
+
+//        if (j != 9) currentColor = float[N_BUCKETS] (0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+
         color = bucketAdd(color, currentColor);
 
 //        light.position = rayOrigin;
         light.intensity = light.intensity * 0.5;
 
         rayOrigin = detectedHit.pointHit;
-        rayVector = reflectedVector;
+        rayVector = -reflectedVector;
     }
 
     return color;
@@ -227,7 +232,6 @@ float[N_BUCKETS] traceRay(vec3 rayOrigin, vec3 rayVector, Triangle triangles[N_T
 
 HitData TriangleRayIntersection(vec3 rayOrigin, vec3 rayVector, Triangle triangle)
 {
-	float EPSILON = 0.0001f;
 	vec3 vertex0 = triangle.vertex0;
 	vec3 vertex1 = triangle.vertex1;
 	vec3 vertex2 = triangle.vertex2;
@@ -292,7 +296,8 @@ vec3 multiplyMatrixAndVector(mat3 mat, vec3 vec) {
 vec3 bucketsToRGB(float buckets[N_BUCKETS]) {
     vec3 waveRGB, totalRGB = vec3(0);
     for (int i = 0; i < N_BUCKETS; i++) {
-        waveRGB = wavelengthToRGB(buckets[i]) * 3 / N_BUCKETS;
+        float wavelength = 400 + i * 30;
+        waveRGB = buckets[i] * wavelengthToRGB(wavelength) * 3 / N_BUCKETS;
         totalRGB += waveRGB;
     }
     return totalRGB;

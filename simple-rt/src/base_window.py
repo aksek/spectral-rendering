@@ -18,21 +18,29 @@ class BaseWindowConfig(WindowConfig):
     def __init__(self, **kwargs):
         super(BaseWindowConfig, self).__init__(**kwargs)
 
-        shaders = get_shaders(self.argv.shaders_dir_path)
-        self.program = self.ctx.program(vertex_shader=shaders[self.argv.shader_name].vertex_shader,
-                                        geometry_shader=shaders[self.argv.shader_name].geometry_shader,
-                                        fragment_shader=shaders[self.argv.shader_name].fragment_shader)
+        if self.argv.use_binning:
+            shaders_dir_path = '../resources/shaders/simple-rt'
+            shader_name = 'simple-rt'
+        else:
+            shaders_dir_path = '../resources/shaders/simple-rt-rgb'
+            shader_name = 'simple-rt-rgb'
+        
+        shaders = get_shaders(shaders_dir_path)
+
+        self.light_color = [float(x) for x in self.argv.light_color.split(',')]
+        self.program = self.ctx.program(vertex_shader=shaders[shader_name].vertex_shader,
+                                        geometry_shader=shaders[shader_name].geometry_shader,
+                                        fragment_shader=shaders[shader_name].fragment_shader)
         self.init_shaders_variables()
+        
 
     def init_shaders_variables(self):
         pass
 
     @classmethod
     def add_arguments(cls, parser):
-        parser.add_argument('--shaders_dir_path', type=str, required=True, help='Path to the directory with shaders')
-        parser.add_argument('--shader_name', type=str, required=True,
-                            help='Name of the shader to look for in the shader_path directory')
-        parser.add_argument('--model_name', type=str, required=False, help='Name of the model to load')
+        parser.add_argument('--use_binning', type=bool, required=True, help='Switches spectral rendering on/off')
+        parser.add_argument('--light_color', type=str, required=False, help='Specify light color', default='1,1,1,1,1,1,1,1,1,1')
 
     def render(self, time: float, frame_time: float):
         pass

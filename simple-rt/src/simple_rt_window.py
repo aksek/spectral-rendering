@@ -17,8 +17,8 @@ class SimpleRTWindow(BaseWindowConfig):
         self.camera_rotation_y = (0.0, 1.0, 0.0)
         self.camera_rotation_z = (0.0, 0.0, 1.0)
         self.camera_angle = 0
-        self.camera_angle_velocity = 0.1
-        self.camera_velocity = 0.5
+        self.camera_angle_velocity = -15
+        self.camera_velocity = 1.0
 
     def init_shaders_variables(self):
         self.res_location = self.program['res']

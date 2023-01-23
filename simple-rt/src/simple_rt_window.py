@@ -25,8 +25,8 @@ class SimpleRTWindow(BaseWindowConfig):
 
         # camera edit variables
         self.camera_position = (0.0, 1.0, -4.0)
-        self.camera_velocity = 1
         self.camera_angle = 0
+        self.camera_velocity = 1.0
         self.camera_angle_velocity = 0.1
 
         # color edit variables
@@ -36,7 +36,6 @@ class SimpleRTWindow(BaseWindowConfig):
         self.left_tetrahedron_color = [0.1, 0.1, 0.2, 0, 0, 0, 0.6, 0.8, 0.9, 0.8]
         self.right_tetrahedron_color = [0.1, 0.1, 0.2, 0, 0.8, 0.9, 0.6, 0.1, 0.1, 0]
         self.walls_color = [0.8, 0.9, 0.8, 6, 0, 0, 0, 0, 0, 0.3]
-
 
     def init_shaders_variables(self):
         self.res_location = self.program['res']

@@ -1,6 +1,6 @@
 #version 330
 
-#define EPSILON 0.00001f
+#define EPSILON 0.0001f
 #define INFTY 9999
 
 #define N_TRIANGLES 10
@@ -56,7 +56,7 @@ float[N_BUCKETS] bucketMul(float[N_BUCKETS] first, float[N_BUCKETS] second);
 void main()
 {
     float[N_BUCKETS] RED = float[N_BUCKETS](0.1, 0.1, 0.2, 0, 0, 0, 0.6, 0.8, 0.9, 0.8);
-    float[N_BUCKETS] GREEN = float[N_BUCKETS](0.1, 0.1, 0.2, 0, 0.8, 0.9, 0.6, 0.3, 0.1, 0);
+    float[N_BUCKETS] GREEN = float[N_BUCKETS](0.1, 0.1, 0.2, 0, 0.8, 0.9, 0.6, 0.1, 0.1, 0);
     float[N_BUCKETS] BLUE = float[N_BUCKETS](0.8, 0.9, 0.8, 6, 0, 0, 0, 0, 0, 0.3);
 
     vec2 resolution = vec2(res);
@@ -148,9 +148,6 @@ void main()
 	uv = uv * 2.0 - 1.0; // transform from [0,1] to [-1,1]
     uv.x *= resolution.x / resolution.y; // aspect fix
 
-    //mat3 cameraRotation = mat3(vec3(1, 0, 0), vec3(0, 1, 0), vec3(0, 0, 1));
-    //vec3 cameraDirection = normalize(cameraTarget - cameraPosition);
-
     vec3 cameraDirection = toViewport(resolution);
     cameraDirection = multiplyMatrixAndVector(cameraRotation, cameraDirection);
 
@@ -194,33 +191,23 @@ float[N_BUCKETS] traceRay(vec3 rayOrigin, vec3 rayVector, Triangle triangles[N_T
             }
         }
         if (detectedShadowHit.rayLength < shadowRayLength) {
-//            color += ambient;
             break;
         }
 
         float diff = max(dot(detectedHit.normal, normalize(-lightVector)), 0.0);
-//        vec3 diffuse = diff * light.intensity * light.color * detectedHit.materialColor / shadowRayLength;
         float[N_BUCKETS] diffuse = bucketMul(light.color, detectedHit.materialColor);
         diffuse = bucketMul(diffuse, diff * light.intensity / shadowRayLength);
 
         vec3 reflectedVector = reflect(normalize(lightVector), detectedHit.normal);
 
         float spec = pow(max(dot(-rayVector, -reflectedVector), 0.0), 32);
-//        vec3 specular = light.color * light.intensity * spec;
-//        specular = vec3(0);
-
         float[N_BUCKETS] specular = bucketMul(light.color, light.intensity * spec);
 
-//        color += int(j==0) * (diffuse + specular);
-//        color += (j+1)/(hitNumber+1) * (diffuse + specular);
-//        color += (diffuse + specular + ambient) * dot(detectedHit.normal, reflectedVector);
         float[N_BUCKETS] currentColor = bucketAdd(diffuse, specular);
 
-//        if (j != 9) currentColor = float[N_BUCKETS] (0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
         color = bucketAdd(color, currentColor);
 
-//        light.position = rayOrigin;
         light.intensity = light.intensity * 0.5;
 
         rayOrigin = detectedHit.pointHit;

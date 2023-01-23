@@ -205,7 +205,6 @@ float[N_BUCKETS] traceRay(vec3 rayOrigin, vec3 rayVector, Triangle triangles[N_T
 
         float[N_BUCKETS] currentColor = bucketAdd(diffuse, specular);
 
-
         color = bucketAdd(color, currentColor);
 
         light.intensity = light.intensity * 0.5;

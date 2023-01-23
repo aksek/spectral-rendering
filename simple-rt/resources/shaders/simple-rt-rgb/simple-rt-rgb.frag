@@ -4,7 +4,6 @@
 #define INFTY 9999
 
 #define N_TRIANGLES 10
-#define N_BUCKETS 10
 
 in vec3 fragPosition;
 
@@ -14,15 +13,15 @@ uniform vec3 res;
 uniform vec3 cameraPosition;
 uniform vec3 cameraAngle;
 
-uniform float leftTetrahedronColor[N_BUCKETS];
-uniform float rightTetrahedronColor[N_BUCKETS];
-uniform float wallsColor[N_BUCKETS];
-uniform float lightColor[N_BUCKETS];
+uniform vec3 leftTetrahedronColor;
+uniform vec3 rightTetrahedronColor;
+uniform vec3 wallsColor;
+uniform vec3 lightColor;
 
 struct Light
 {
     vec3 position;
-    float[N_BUCKETS] color;
+    vec3 color;
     float intensity;
 };
 
@@ -31,7 +30,7 @@ struct Triangle
 	vec3 vertex0;
 	vec3 vertex1;
 	vec3 vertex2;
-    float[N_BUCKETS] color;
+    vec3 color;
 };
 
 struct Ray
@@ -45,25 +44,20 @@ struct HitData
 	float rayLength;
 	vec3 normal;
     vec3 pointHit;
-    float[N_BUCKETS] materialColor;
+    vec3 materialColor;
 };
 
 HitData TriangleRayIntersection(vec3 rayOrigin, vec3 rayVector, Triangle triangle);
-float[N_BUCKETS] traceRay(vec3 rayOrigin, vec3 rayVector, Triangle triangles[N_TRIANGLES], Light light, int hitNumber);
+vec3 traceRay(vec3 rayOrigin, vec3 rayVector, Triangle triangles[N_TRIANGLES], Light light, int hitNumber);
 vec3 multiplyMatrixAndVector(mat3 mat, vec3 vec);
 vec3 toViewport(vec2 resolution);
-vec3 wavelengthToRGB(float wavelength);
-vec3 bucketsToRGB(float buckets[N_BUCKETS]);
-float[N_BUCKETS] bucketAdd(float[N_BUCKETS] first, float[N_BUCKETS] second);
-float[N_BUCKETS] bucketMul(float[N_BUCKETS] buckets, float scalar);
-float[N_BUCKETS] bucketMul(float[N_BUCKETS] first, float[N_BUCKETS] second);
 
 void main()
 {
-//    float[N_BUCKETS] leftTetrahedronColor = float[N_BUCKETS](0.1, 0.1, 0.2, 0, 0, 0, 0.6, 0.8, 0.9, 0.8);
-//    float[N_BUCKETS] rightTetrahedronColor = float[N_BUCKETS](0.1, 0.1, 0.2, 0, 0.8, 0.9, 0.6, 0.1, 0.1, 0);
-//    float[N_BUCKETS] wallsColor = float[N_BUCKETS](0.8, 0.9, 0.8, 6, 0, 0, 0, 0, 0, 0.3);
-//    float[N_BUCKETS] lightColor = float[N_BUCKETS](1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+//    vec3 rightTetrahedronColor = vec3(1, 0, 0);
+//    vec3 leftTetrahedronColor = vec3(0, 1, 0);
+//    vec3 wallsColor = vec3(0, 0, 1);
+//    vec3 lightColor = vec3(1);
 
     vec2 resolution = vec2(res);
 
@@ -71,73 +65,73 @@ void main()
     base.vertex0 = vec3(-2, 0, -2);
     base.vertex1 = vec3(1, 0, -2);
     base.vertex2 = vec3(-2, 0, 2);
-    base.color = leftTetrahedronColor;
+    base.color = rightTetrahedronColor;
 
     Triangle wall1;
     wall1.vertex0 = vec3(-2, 0, -2);
     wall1.vertex1 = vec3(1, 0, -2);
     wall1.vertex2 = vec3(-1, 3, -1);
-    wall1.color = leftTetrahedronColor;
+    wall1.color = rightTetrahedronColor;
 
     Triangle wall2;
     wall2.vertex0 = vec3(1, 0, -2);
     wall2.vertex1 = vec3(-2, 0, 2);
     wall2.vertex2 = vec3(-1, 3, -1);
-    wall2.color = leftTetrahedronColor;
+    wall2.color = rightTetrahedronColor;
 
     Triangle wall3;
     wall3.vertex0 = vec3(-2, 0, 2);
     wall3.vertex1 = vec3(-2, 0, -2);
     wall3.vertex2 = vec3(-1, 3, -1);
-    wall3.color = leftTetrahedronColor;
+    wall3.color = rightTetrahedronColor;
 
     Triangle wall4;
     wall4.vertex0 = vec3(-3, 0, 2);
     wall4.vertex1 = vec3(-3, 0, -2);
     wall4.vertex2 = vec3(-3, 3, -1);
-    wall4.color = leftTetrahedronColor;
+    wall4.color = rightTetrahedronColor;
 
     Triangle base1;
     base1.vertex0 = vec3(-5, 0, -2);
     base1.vertex1 = vec3(-2, 0, -2);
     base1.vertex2 = vec3(-5, 0, 2);
-    base1.color = rightTetrahedronColor;
+    base1.color = leftTetrahedronColor;
 
     Triangle wall11;
     wall11.vertex0 = vec3(-5, 0, -2);
     wall11.vertex1 = vec3(-2, 0, -2);
     wall11.vertex2 = vec3(-4, 3, -1);
-    wall11.color = rightTetrahedronColor;
+    wall11.color = leftTetrahedronColor;
 
     Triangle wall21;
     wall21.vertex0 = vec3(-2, 0, -2);
     wall21.vertex1 = vec3(-5, 0, 2);
     wall21.vertex2 = vec3(-4, 3, -1);
-    wall21.color = rightTetrahedronColor;
+    wall21.color = leftTetrahedronColor;
 
     Triangle wall31;
     wall31.vertex0 = vec3(-5, 0, 2);
     wall31.vertex1 = vec3(-5, 0, -2);
     wall31.vertex2 = vec3(-4, 3, -1);
-    wall31.color = rightTetrahedronColor;
+    wall31.color = leftTetrahedronColor;
 
     Triangle wall41;
     wall41.vertex0 = vec3(-6, 0, 2);
     wall41.vertex1 = vec3(-6, 0, -2);
     wall41.vertex2 = vec3(-6, 3, -1);
-    wall41.color = rightTetrahedronColor;
+    wall41.color = leftTetrahedronColor;
 
     Triangle plane;
     plane.vertex0 = vec3(-20, -1, -20);
     plane.vertex1 = vec3( 20, -1, -20);
     plane.vertex2 = vec3(-20, -1,  20);
-    plane.color = leftTetrahedronColor;
+    plane.color = wallsColor;
 
     Triangle plane2;
     plane2.vertex0 = vec3( 20, -1,  20);
     plane2.vertex1 = vec3(  0, 40,  20);
     plane2.vertex2 = vec3(-20, -1,  20);
-    plane2.color = rightTetrahedronColor;
+    plane2.color = wallsColor;
 
     Triangle tetrahedron[N_TRIANGLES] = Triangle[N_TRIANGLES] (
         base, wall1, wall2, wall3, base1, wall11, wall21, wall31, plane, plane2
@@ -150,7 +144,7 @@ void main()
 
     // normalized pixel coordinates (from 0 to 1)
     vec2 uv = gl_FragCoord.xy / resolution.xy;
-    
+
 	uv = uv * 2.0 - 1.0; // transform from [0,1] to [-1,1]
     uv.x *= resolution.x / resolution.y; // aspect fix
 
@@ -160,23 +154,23 @@ void main()
     uMatrix[0][2] = -1;
     mat3 cameraRotation = cos(cameraAngle[0]) * mat3(1.0) + (1 - cos(cameraAngle[0])) * outerProduct(u, u) + sin(cameraAngle[0]) * uMatrix;
 
-    vec3 cameraDirection = toViewport(resolution);
+    vec3 cameraDirection = normalize(toViewport(resolution));
     cameraDirection = multiplyMatrixAndVector(cameraRotation, cameraDirection);
 
     int hitNumber = 10;
     vec3 rayStartingPositon = cameraPosition;
     vec3 rayDirection = normalize(cameraDirection + vec3(uv, 0));
 
-    float[N_BUCKETS] bucketColor = traceRay(rayStartingPositon, rayDirection, tetrahedron, light, hitNumber);
 
-    vec3 color = bucketsToRGB(bucketColor);
+    vec3 color = traceRay(rayStartingPositon, rayDirection, tetrahedron, light, hitNumber);
+
     fragColor = vec4(color, 1);
 }
 
-float[N_BUCKETS] traceRay(vec3 rayOrigin, vec3 rayVector, Triangle triangles[N_TRIANGLES], Light light, int hitNumber) {
+vec3 traceRay(vec3 rayOrigin, vec3 rayVector, Triangle triangles[N_TRIANGLES], Light light, int hitNumber) {
     vec3 ambient = vec3(0.01, 0.01, 0.05);
 
-    float[N_BUCKETS] color = float[N_BUCKETS](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    vec3 color = vec3(0);
     for (int j = hitNumber; j >= 0; j--) {
 
         HitData detectedHit;
@@ -207,17 +201,17 @@ float[N_BUCKETS] traceRay(vec3 rayOrigin, vec3 rayVector, Triangle triangles[N_T
         }
 
         float diff = max(dot(detectedHit.normal, normalize(-lightVector)), 0.0);
-        float[N_BUCKETS] diffuse = bucketMul(light.color, detectedHit.materialColor);
-        diffuse = bucketMul(diffuse, diff * light.intensity / shadowRayLength);
+        vec3 diffuse = light.color * detectedHit.materialColor;
+        diffuse = diffuse * diff * light.intensity / shadowRayLength;
 
         vec3 reflectedVector = reflect(normalize(lightVector), detectedHit.normal);
 
         float spec = pow(max(dot(-rayVector, -reflectedVector), 0.0), 32);
-        float[N_BUCKETS] specular = bucketMul(light.color, light.intensity * spec);
+        vec3 specular = light.color * light.intensity * spec;
 
-        float[N_BUCKETS] currentColor = bucketAdd(diffuse, specular);
+        vec3 currentColor = diffuse + specular;
 
-        color = bucketAdd(color, currentColor);
+        color += currentColor;
 
         light.intensity = light.intensity * 0.5;
 
@@ -291,73 +285,3 @@ vec3 multiplyMatrixAndVector(mat3 mat, vec3 vec) {
   return result;
 }
 
-vec3 bucketsToRGB(float buckets[N_BUCKETS]) {
-    vec3 waveRGB, totalRGB = vec3(0);
-    for (int i = 0; i < N_BUCKETS; i++) {
-        float wavelength = 400 + i * 30;
-        waveRGB = buckets[i] * wavelengthToRGB(wavelength) * 3 / N_BUCKETS;
-        totalRGB += waveRGB;
-    }
-    return totalRGB;
-}
-
-vec3 wavelengthToRGB(float wavelength) {
-    float r=0, g=0, b=0;
-
-    if (wavelength <= 410) {
-        r = 0.136667 * wavelength - 55.4333;
-        g = 0;
-        b = 8.59 - 0.02 * wavelength;
-    } else if (wavelength <= 440) {
-        r = 0.19 - 0.19 * (44/3 - wavelength / 30);
-        g = 0;
-        b = 1;
-    } else if (wavelength <= 490) {
-        r = 0;
-        g = (wavelength - 440) / 50;
-        b = 1;
-    } else if (wavelength <= 510) {
-        r = 0;
-        g = 1;
-        b = 51/2 - wavelength / 20;
-    } else if (wavelength <= 580) {
-        r = (wavelength - 510) / 70;
-        g = 1;
-        b = 0;
-    } else if (wavelength <= 640) {
-        r = 1;
-        g = 64/6 - wavelength/60;
-        b = 0;
-    } else if (wavelength <= 700) {
-        r = 1;
-        g = 0;
-        b = 0;
-    } else if (wavelength <= 780) {
-        r = 0.35 - 0.65 * (78/8 - wavelength/80);
-        g = 0;
-        b = 0;
-    }
-
-    return vec3(r, g, b);
-}
-
-float[N_BUCKETS] bucketMul(float[N_BUCKETS] first, float[N_BUCKETS] second) {
-    for (int i = 0; i < N_BUCKETS; i++) {
-        first[i] *= second[i];
-    }
-    return first;
-}
-
-float[N_BUCKETS] bucketMul(float[N_BUCKETS] buckets, float scalar) {
-    for (int i = 0; i < N_BUCKETS; i++) {
-        buckets[i] *= scalar;
-    }
-    return buckets;
-}
-
-float[N_BUCKETS] bucketAdd(float[N_BUCKETS] first, float[N_BUCKETS] second) {
-    for (int i = 0; i < N_BUCKETS; i++) {
-        first[i] += second[i];
-    }
-    return first;
-}

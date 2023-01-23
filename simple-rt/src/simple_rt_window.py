@@ -12,6 +12,7 @@ class SimpleRTWindow(BaseWindowConfig):
         super(SimpleRTWindow, self).__init__(**kwargs)
         self.obj_model = self.load_scene(self.model_path)
         self.vao_sphere = self.obj_model.root_nodes[0].mesh.vao.instance(self.program)
+        self.load_skybox_textures()
         self.camera_location = (0.0, 1.0, -4.0)
         self.camera_rotation_x = (1.0, 0.0, 0.0)
         self.camera_rotation_y = (0.0, 1.0, 0.0)
@@ -21,8 +22,11 @@ class SimpleRTWindow(BaseWindowConfig):
     def init_shaders_variables(self):
         self.res_location = self.program['res']
         self.camera_position_location = self.program['cameraPosition']
-        self.camera_rotation_location = self.program['cameraRotation']
-    
+
+    def load_skybox_textures(self):
+        faces = ['right', 'left', 'top', 'bottom', 'front', 'back']
+        self.skybox_textures = [self.load_texture_2d(self.envmap_dir + "/" + face + ".png") for face in faces]
+
     def key_event(self, key, action, modifiers):
         if action == self.wnd.keys.ACTION_PRESS:
 

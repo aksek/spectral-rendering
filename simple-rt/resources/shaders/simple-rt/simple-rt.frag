@@ -160,7 +160,7 @@ void main()
     uMatrix[0][2] = -1;
     mat3 cameraRotation = cos(cameraAngle[0]) * mat3(1.0) + (1 - cos(cameraAngle[0])) * outerProduct(u, u) + sin(cameraAngle[0]) * uMatrix;
 
-    vec3 cameraDirection = toViewport(resolution);
+    vec3 cameraDirection = normalize(toViewport(resolution));
     cameraDirection = multiplyMatrixAndVector(cameraRotation, cameraDirection);
 
     int hitNumber = 10;

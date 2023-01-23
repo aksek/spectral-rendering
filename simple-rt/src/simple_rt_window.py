@@ -16,12 +16,15 @@ class SimpleRTWindow(BaseWindowConfig):
         self.camera_rotation_x = (1.0, 0.0, 0.0)
         self.camera_rotation_y = (0.0, 1.0, 0.0)
         self.camera_rotation_z = (0.0, 0.0, 1.0)
+        self.camera_angle = 0
+        self.camera_angle_velocity = 0.1
         self.camera_velocity = 0.5
 
     def init_shaders_variables(self):
         self.res_location = self.program['res']
         self.camera_position_location = self.program['cameraPosition']
-        self.camera_rotation_location = self.program['cameraRotation']
+        # self.camera_rotation_location = self.program['cameraRotation']
+        self.camera_angle_location = self.program['cameraAngle']
     
     def key_event(self, key, action, modifiers):
         if action == self.wnd.keys.ACTION_PRESS:
@@ -39,16 +42,21 @@ class SimpleRTWindow(BaseWindowConfig):
             elif key == self.wnd.keys.F:
                 self.update_camera_location(2, -1)
 
-            # elif key == self.wnd.keys.X:
-            #     self.update_camera_rotation_x(0, -1)
-            #     self.update_camera_rotation_x(2, 1)
-            #     self.update_camera_rotation_z(0, -1)
-            #     self.update_camera_rotation_z(2, -1)
-            # elif key == self.wnd.keys.Z:
-            #     self.update_camera_rotation_x(0, 1)
-            #     self.update_camera_rotation_x(2, -1)
-            #     self.update_camera_rotation_z(0, 1)
-            #     self.update_camera_rotation_z(2, 1)
+            elif key == self.wnd.keys.Q:
+                self.update_camera_angle(-1)
+            elif key == self.wnd.keys.E:
+                self.update_camera_angle(1)
+
+            elif key == self.wnd.keys.X:
+                self.update_camera_rotation_x(0, -1)
+                self.update_camera_rotation_x(2, 1)
+                self.update_camera_rotation_z(0, -1)
+                self.update_camera_rotation_z(2, -1)
+            elif key == self.wnd.keys.Z:
+                self.update_camera_rotation_x(0, 1)
+                self.update_camera_rotation_x(2, -1)
+                self.update_camera_rotation_z(0, 1)
+                self.update_camera_rotation_z(2, 1)
 
             self.render(0, 0)
     
@@ -92,6 +100,9 @@ class SimpleRTWindow(BaseWindowConfig):
         if axis == 2:
             self.camera_rotation_z = (self.camera_rotation_z[0], self.camera_rotation_z[1], current_value)
 
+    def update_camera_angle(self, value):
+        self.camera_angle += self.camera_angle_velocity * value
+
     def unicode_char_entered(self, char: str):
         print('character entered:', char)
 
@@ -101,10 +112,11 @@ class SimpleRTWindow(BaseWindowConfig):
 
         self.res_location.write(pyrr.Vector3((self.window_size[0], self.window_size[1], 0), dtype='f4'))
         self.camera_position_location.write(pyrr.Vector3(self.camera_location, dtype='f4'))
-        self.camera_rotation_location.write(pyrr.Matrix33((
-            self.camera_rotation_x,
-            self.camera_rotation_y,
-            self.camera_rotation_z
-        ), dtype='f4'))
+        self.camera_angle_location.write(pyrr.Vector3((self.camera_angle, 0, 0), dtype='f4'))
+        # self.camera_rotation_location.write(pyrr.Matrix33((
+        #     self.camera_rotation_x,
+        #     self.camera_rotation_y,
+        #     self.camera_rotation_z
+        # ), dtype='f4'))
 
         self.vao_sphere.render()

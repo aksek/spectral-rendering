@@ -12,12 +12,12 @@ out vec4 fragColor;
 
 uniform vec3 res;
 uniform vec3 cameraPosition;
-uniform vec3 cameraAngle;
 
-uniform float leftTetrahedronColor[N_BUCKETS];
-uniform float rightTetrahedronColor[N_BUCKETS];
-uniform float wallsColor[N_BUCKETS];
-uniform float lightColor[N_BUCKETS];
+uniform float cameraAngle;
+uniform float[N_BUCKETS] leftTetrahedronColor;
+uniform float[N_BUCKETS] rightTetrahedronColor;
+uniform float[N_BUCKETS] wallsColor;
+uniform float[N_BUCKETS] lightColor;
 
 struct Light
 {
@@ -131,13 +131,13 @@ void main()
     plane.vertex0 = vec3(-20, -1, -20);
     plane.vertex1 = vec3( 20, -1, -20);
     plane.vertex2 = vec3(-20, -1,  20);
-    plane.color = leftTetrahedronColor;
+    plane.color = wallsColor;
 
     Triangle plane2;
     plane2.vertex0 = vec3( 20, -1,  20);
     plane2.vertex1 = vec3(  0, 40,  20);
     plane2.vertex2 = vec3(-20, -1,  20);
-    plane2.color = rightTetrahedronColor;
+    plane2.color = wallsColor;
 
     Triangle tetrahedron[N_TRIANGLES] = Triangle[N_TRIANGLES] (
         base, wall1, wall2, wall3, base1, wall11, wall21, wall31, plane, plane2
@@ -158,7 +158,7 @@ void main()
     mat3 uMatrix = mat3(0);
     uMatrix[2][0] = 1;
     uMatrix[0][2] = -1;
-    mat3 cameraRotation = cos(cameraAngle[0]) * mat3(1.0) + (1 - cos(cameraAngle[0])) * outerProduct(u, u) + sin(cameraAngle[0]) * uMatrix;
+    mat3 cameraRotation = cos(cameraAngle) * mat3(1.0) + (1 - cos(cameraAngle)) * outerProduct(u, u) + sin(cameraAngle) * uMatrix;
 
     vec3 cameraDirection = normalize(toViewport(resolution));
     cameraDirection = multiplyMatrixAndVector(cameraRotation, cameraDirection);

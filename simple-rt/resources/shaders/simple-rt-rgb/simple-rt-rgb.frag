@@ -11,7 +11,7 @@ out vec4 fragColor;
 
 uniform vec3 res;
 uniform vec3 cameraPosition;
-uniform vec3 cameraAngle;
+uniform float cameraAngle;
 
 uniform vec3 leftTetrahedronColor;
 uniform vec3 rightTetrahedronColor;
@@ -152,7 +152,7 @@ void main()
     mat3 uMatrix = mat3(0);
     uMatrix[2][0] = 1;
     uMatrix[0][2] = -1;
-    mat3 cameraRotation = cos(cameraAngle[0]) * mat3(1.0) + (1 - cos(cameraAngle[0])) * outerProduct(u, u) + sin(cameraAngle[0]) * uMatrix;
+    mat3 cameraRotation = cos(cameraAngle) * mat3(1.0) + (1 - cos(cameraAngle)) * outerProduct(u, u) + sin(cameraAngle) * uMatrix;
 
     vec3 cameraDirection = normalize(toViewport(resolution));
     cameraDirection = multiplyMatrixAndVector(cameraRotation, cameraDirection);

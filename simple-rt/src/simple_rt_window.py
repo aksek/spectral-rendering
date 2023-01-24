@@ -25,17 +25,22 @@ class SimpleRTWindow(BaseWindowConfig):
 
         # camera edit variables
         self.camera_position = (0.0, 1.0, -4.0)
-        self.camera_angle = 0
+        self.camera_angle = 0.0
         self.camera_velocity = 1.0
         self.camera_angle_velocity = 0.1
 
         # color edit variables
         self.color_edit_mode = ColorEditMode.LightColor
         self.color_edit_direction = -1
-        self.color_edit_velocity = 0.1
-        self.left_tetrahedron_color = [0.1, 0.1, 0.2, 0, 0, 0, 0.6, 0.8, 0.9, 0.8]
-        self.right_tetrahedron_color = [0.1, 0.1, 0.2, 0, 0.8, 0.9, 0.6, 0.1, 0.1, 0]
-        self.walls_color = [0.8, 0.9, 0.8, 6, 0, 0, 0, 0, 0, 0.3]
+        self.color_edit_velocity = 1
+        if len(self.light_color) == 3:
+            self.left_tetrahedron_color = [1.0, 0.0, 0.0]
+            self.right_tetrahedron_color = [0.0, 0.0, 1.0]
+            self.walls_color = [1.0, 1.0, 0.0]
+        else:
+            self.left_tetrahedron_color = [0.1, 0.1, 0.2, 0, 0, 0, 0.6, 0.8, 0.9, 0.8]
+            self.right_tetrahedron_color = [0.1, 0.1, 0.2, 0, 0.8, 0.9, 0.6, 0.1, 0.1, 0]
+            self.walls_color = [0.8, 0.9, 0.8, 6, 0, 0, 0, 0, 0, 0.3]
 
     def init_shaders_variables(self):
         self.res_location = self.program['res']
@@ -96,19 +101,26 @@ class SimpleRTWindow(BaseWindowConfig):
             elif key == self.wnd.keys.NUMBER_2:
                 self.update_color(2)
             elif key == self.wnd.keys.NUMBER_3:
-                self.update_color(3)
+                if len(self.light_color) > 3:  
+                    self.update_color(3)
             elif key == self.wnd.keys.NUMBER_4:
-                self.update_color(4)
+                if len(self.light_color) > 3:  
+                    self.update_color(4)
             elif key == self.wnd.keys.NUMBER_5:
-                self.update_color(5)
+                if len(self.light_color) > 3:  
+                    self.update_color(5)
             elif key == self.wnd.keys.NUMBER_6:
-                self.update_color(6)
+                if len(self.light_color) > 3:  
+                    self.update_color(6)
             elif key == self.wnd.keys.NUMBER_7:
-                self.update_color(7)
+                if len(self.light_color) > 3:  
+                    self.update_color(7)
             elif key == self.wnd.keys.NUMBER_8:
-                self.update_color(8)
+                if len(self.light_color) > 3:  
+                    self.update_color(8)
             elif key == self.wnd.keys.NUMBER_9:
-                self.update_color(9)
+                if len(self.light_color) > 3:  
+                    self.update_color(9)
 
             self.render(0, 0)
 
@@ -157,7 +169,7 @@ class SimpleRTWindow(BaseWindowConfig):
 
         self.res_location.write(pyrr.Vector3((self.window_size[0], self.window_size[1], 0), dtype='f4'))
         self.camera_position_location.write(pyrr.Vector3(self.camera_position, dtype='f4'))
-
+        
         self.camera_angle_location.value = self.camera_angle
         self.left_tetrahedron_color_location.value = self.left_tetrahedron_color
         self.right_tetrahedron_color_location.value = self.right_tetrahedron_color

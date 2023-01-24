@@ -141,21 +141,22 @@ class SimpleRTWindow(BaseWindowConfig):
 
 
     def update_color(self, index):
+        max = 5 if len(self.light_color) > 3 else 1
         if self.color_edit_mode == ColorEditMode.LeftTetrahedronColor:
             self.left_tetrahedron_color[index] += self.color_edit_direction * self.color_edit_velocity
-            self.left_tetrahedron_color[index] = np.clip(self.left_tetrahedron_color[index], 0, 1)
+            self.left_tetrahedron_color[index] = np.clip(self.left_tetrahedron_color[index], 0, max)
 
         elif self.color_edit_mode == ColorEditMode.RightTetrahedronColor:
             self.right_tetrahedron_color[index] += self.color_edit_direction * self.color_edit_velocity
-            self.right_tetrahedron_color[index] = np.clip(self.right_tetrahedron_color[index], 0, 1)
+            self.right_tetrahedron_color[index] = np.clip(self.right_tetrahedron_color[index], 0, max)
 
         elif self.color_edit_mode == ColorEditMode.LightColor:
             self.light_color[index] += self.color_edit_direction * self.color_edit_velocity
-            self.light_color[index] = np.clip(self.light_color[index], 0, 1)
+            self.light_color[index] = np.clip(self.light_color[index], 0, max)
 
         elif self.color_edit_mode == ColorEditMode.WallsColor:
             self.walls_color[index] += self.color_edit_direction * self.color_edit_velocity
-            self.walls_color[index] = np.clip(self.walls_color[index], 0, 1)
+            self.walls_color[index] = np.clip(self.walls_color[index], 0, max)
 
 
 

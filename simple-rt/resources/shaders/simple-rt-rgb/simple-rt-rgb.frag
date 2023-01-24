@@ -3,7 +3,7 @@
 #define EPSILON 0.0001f
 #define INFTY 9999
 
-#define N_TRIANGLES 10
+#define N_TRIANGLES 12
 
 in vec3 fragPosition;
 
@@ -62,85 +62,85 @@ void main()
     vec2 resolution = vec2(res);
 
     Triangle base;
-    base.vertex0 = vec3(-2, 0, -2);
-    base.vertex1 = vec3(1, 0, -2);
-    base.vertex2 = vec3(-2, 0, 2);
-    base.color = rightTetrahedronColor;
+    base.vertex0 = vec3(-3, 0, 1);
+    base.vertex1 = vec3(0, 0, 2);
+    base.vertex2 = vec3(-1, 0, -1);
+    base.color = leftTetrahedronColor;
 
     Triangle wall1;
-    wall1.vertex0 = vec3(-2, 0, -2);
-    wall1.vertex1 = vec3(1, 0, -2);
-    wall1.vertex2 = vec3(-1, 3, -1);
-    wall1.color = rightTetrahedronColor;
+    wall1.vertex0 = vec3(-3, 0, 1);
+    wall1.vertex1 = vec3(0, 0, 2);
+    wall1.vertex2 = vec3(-1.5, 3, 0.5);
+    wall1.color = leftTetrahedronColor;
 
     Triangle wall2;
-    wall2.vertex0 = vec3(1, 0, -2);
-    wall2.vertex1 = vec3(-2, 0, 2);
-    wall2.vertex2 = vec3(-1, 3, -1);
-    wall2.color = rightTetrahedronColor;
+    wall2.vertex0 = vec3(-3, 0, 1);
+    wall2.vertex1 = vec3(-1, 0, -1);
+    wall2.vertex2 = vec3(-1.5, 3, 0.5);
+    wall2.color = leftTetrahedronColor;
 
     Triangle wall3;
-    wall3.vertex0 = vec3(-2, 0, 2);
-    wall3.vertex1 = vec3(-2, 0, -2);
-    wall3.vertex2 = vec3(-1, 3, -1);
-    wall3.color = rightTetrahedronColor;
-
-    Triangle wall4;
-    wall4.vertex0 = vec3(-3, 0, 2);
-    wall4.vertex1 = vec3(-3, 0, -2);
-    wall4.vertex2 = vec3(-3, 3, -1);
-    wall4.color = rightTetrahedronColor;
+    wall3.vertex0 = vec3(0, 0, 2);
+    wall3.vertex1 = vec3(-1, 0, -1);
+    wall3.vertex2 = vec3(-1.5, 3, 0.5);
+    wall3.color = leftTetrahedronColor;
 
     Triangle base1;
-    base1.vertex0 = vec3(-5, 0, -2);
-    base1.vertex1 = vec3(-2, 0, -2);
-    base1.vertex2 = vec3(-5, 0, 2);
-    base1.color = leftTetrahedronColor;
+    base1.vertex0 = vec3(0, 0, 2);
+    base1.vertex1 = vec3(3, 0, 1);
+    base1.vertex2 = vec3(1, 0, -1);
+    base1.color = rightTetrahedronColor;
 
     Triangle wall11;
-    wall11.vertex0 = vec3(-5, 0, -2);
-    wall11.vertex1 = vec3(-2, 0, -2);
-    wall11.vertex2 = vec3(-4, 3, -1);
-    wall11.color = leftTetrahedronColor;
+    wall11.vertex0 = vec3(0, 0, 2);
+    wall11.vertex1 = vec3(3, 0, 1);
+    wall11.vertex2 = vec3(1.5, 3, 0.5);
+    wall11.color = rightTetrahedronColor;
 
     Triangle wall21;
-    wall21.vertex0 = vec3(-2, 0, -2);
-    wall21.vertex1 = vec3(-5, 0, 2);
-    wall21.vertex2 = vec3(-4, 3, -1);
-    wall21.color = leftTetrahedronColor;
+    wall21.vertex0 = vec3(0, 0, 2);
+    wall21.vertex1 = vec3(1, 0, -1);
+    wall21.vertex2 = vec3(1.5, 3, 0.5);
+    wall21.color = rightTetrahedronColor;
 
     Triangle wall31;
-    wall31.vertex0 = vec3(-5, 0, 2);
-    wall31.vertex1 = vec3(-5, 0, -2);
-    wall31.vertex2 = vec3(-4, 3, -1);
-    wall31.color = leftTetrahedronColor;
-
-    Triangle wall41;
-    wall41.vertex0 = vec3(-6, 0, 2);
-    wall41.vertex1 = vec3(-6, 0, -2);
-    wall41.vertex2 = vec3(-6, 3, -1);
-    wall41.color = leftTetrahedronColor;
+    wall31.vertex0 = vec3(1, 0, -1);
+    wall31.vertex1 = vec3(3, 0, 1);
+    wall31.vertex2 = vec3(1.5, 3, 0.5);
+    wall31.color = rightTetrahedronColor;
 
     Triangle plane;
     plane.vertex0 = vec3(-20, -1, -20);
     plane.vertex1 = vec3( 20, -1, -20);
-    plane.vertex2 = vec3(-20, -1,  20);
+    plane.vertex2 = vec3(  0, -1,  20);
     plane.color = wallsColor;
 
     Triangle plane2;
-    plane2.vertex0 = vec3( 20, -1,  20);
-    plane2.vertex1 = vec3(  0, 40,  20);
-    plane2.vertex2 = vec3(-20, -1,  20);
+    plane2.vertex0 = vec3(  0, -1, 20);
+    plane2.vertex1 = vec3(  0, 20,  0);
+    plane2.vertex2 = vec3( 20, -1,-20);
     plane2.color = wallsColor;
 
+    Triangle plane3;
+    plane3.vertex0 = vec3( 20, -1,-20);
+    plane3.vertex1 = vec3(  0, 20,  0);
+    plane3.vertex2 = vec3(-20, -1,-20);
+    plane3.color = wallsColor;
+
+    Triangle plane4;
+    plane4.vertex0 = vec3(  0, -1, 20);
+    plane4.vertex1 = vec3(  0, 20,  0);
+    plane4.vertex2 = vec3(-20, -1,-20);
+    plane4.color = wallsColor;
+
     Triangle tetrahedron[N_TRIANGLES] = Triangle[N_TRIANGLES] (
-        base, wall1, wall2, wall3, base1, wall11, wall21, wall31, plane, plane2
+        base, wall1, wall2, wall3, base1, wall11, wall21, wall31, plane, plane2, plane3, plane4
     );
 
     Light light;
     light.position = vec3(-3.5, 5, -5);
     light.color = lightColor;
-    light.intensity = 2;
+    light.intensity = 4;
 
     // normalized pixel coordinates (from 0 to 1)
     vec2 uv = gl_FragCoord.xy / resolution.xy;

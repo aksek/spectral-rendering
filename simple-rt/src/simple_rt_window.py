@@ -32,7 +32,7 @@ class SimpleRTWindow(BaseWindowConfig):
         # color edit variables
         self.color_edit_mode = ColorEditMode.LightColor
         self.color_edit_direction = -1
-        self.color_edit_velocity = 1
+        self.color_edit_velocity = 0.1
         self.left_tetrahedron_color = [0.1, 0.1, 0.2, 0, 0, 0, 0.6, 0.8, 0.9, 0.8]
         self.right_tetrahedron_color = [0.1, 0.1, 0.2, 0, 0.8, 0.9, 0.6, 0.1, 0.1, 0]
         self.walls_color = [0.8, 0.9, 0.8, 6, 0, 0, 0, 0, 0, 0.3]
@@ -82,7 +82,7 @@ class SimpleRTWindow(BaseWindowConfig):
             elif key == self.wnd.keys.L:
                 self.color_edit_mode = ColorEditMode.LightColor
             
-            # choose if add or subtract color
+            # choose whether to add or subtract color
             elif key == self.wnd.keys.EQUAL:
                 self.color_edit_direction = 1
             elif key == self.wnd.keys.MINUS:

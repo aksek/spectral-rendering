@@ -20,17 +20,18 @@ class BaseWindowConfig(WindowConfig):
         super(BaseWindowConfig, self).__init__(**kwargs)
         self.reflections_num = self.argv.reflections_num
         cur_dir = str(Path(__file__).parent.resolve())
-        if self.argv.use_binning:
+
+        if self.argv.use_binning.lower() == 'true':
+            self.light_color = [float(x) for x in self.argv.light_color.split(',')]
             shaders_dir_path = cur_dir + '/../resources/shaders/simple-rt'
             shader_name = 'simple-rt'
         else:
+            self.light_color = [float(x) for x in self.argv.light_color.split(',')][0:3]
             shaders_dir_path = cur_dir + '/../resources/shaders/simple-rt-rgb'
             shader_name = 'simple-rt-rgb'
         
         shaders = get_shaders(shaders_dir_path)
 
-        self.light_color = [float(x) for x in self.argv.light_color.split(',')]
-        print(self.light_color)
         self.program = self.ctx.program(vertex_shader=shaders[shader_name].vertex_shader,
                                         geometry_shader=shaders[shader_name].geometry_shader,
                                         fragment_shader=shaders[shader_name].fragment_shader)
@@ -43,7 +44,7 @@ class BaseWindowConfig(WindowConfig):
     @classmethod
     def add_arguments(cls, parser):
 
-        parser.add_argument('--use_binning', type=bool, required=True, help='Switches spectral rendering on/off')
+        parser.add_argument('--use_binning', type=str, required=True, help='Switches spectral rendering on/off')
         parser.add_argument('--light_color', type=str, required=False, help='Specify light color', default='1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0')
         parser.add_argument('--reflections_num', type=int, required=True, help='num of ray reflections')
 

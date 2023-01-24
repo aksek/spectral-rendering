@@ -17,68 +17,23 @@ TRAK_MainWindow::~TRAK_MainWindow()
 }
 
 
-
-
 void TRAK_MainWindow::on_pushButton_released()
 {
-    bool binning = ui->binningCheckBox->isChecked();
-    QString binningString = " --use_binning=";
-    if (binning)
-    {
-        binningString += "True";
-    }
-    else
-    {
-        binningString += "False";
-    }
+    QString binningString = getBinningParameterString();
+    QString reflectionsNumString = getReflectionsNumParameterString();
 
-    int reflections_num = ui->NumOfReflectionsSlider->value();
-    if (reflections_num < 0 || reflections_num > 10)
+    if (reflectionsNumString.isEmpty())
     {
         QMessageBox msgBox;
         msgBox.setText("Liczba odbić musi być w przedziale <0; 10>");
         msgBox.exec();
         return;
     }
-    QString reflections_num_string = " --reflections_num=" + QString::number(reflections_num);
 
-    QString color400String = sliderValueToQString(ui->color_400_valueSlider->value());
-    QString color430String = sliderValueToQString(ui->color_430_valueSlider->value());
-    QString color460String = sliderValueToQString(ui->color_460_valueSlider->value());
-    QString color490String = sliderValueToQString(ui->color_490_valueSlider->value());
-    QString color520String = sliderValueToQString(ui->color_520_valueSlider->value());
-    QString color550String = sliderValueToQString(ui->color_550_valueSlider->value());
-    QString color580String = sliderValueToQString(ui->color_580_valueSlider->value());
-    QString color610String = sliderValueToQString(ui->color_610_valueSlider->value());
-    QString color640String = sliderValueToQString(ui->color_640_valueSlider->value());
-    QString color670String = sliderValueToQString(ui->color_670_valueSlider->value());
+    QString lightColorString = getLightColorParameterString();
 
-    QString lightColorString = " --light_color=";
-    lightColorString += color400String + ",";
-    lightColorString += color430String + ",";
-    lightColorString += color460String;
-    if (binning)
-    {
-        lightColorString += ",";
-        lightColorString += color490String + ",";
-        lightColorString += color520String + ",";
-        lightColorString += color550String + ",";
-        lightColorString += color580String + ",";
-        lightColorString += color610String + ",";
-        lightColorString += color640String + ",";
-        lightColorString += color670String;
-    }
-
-    QString finalString = "python " + QDir::currentPath() + "/simple-rt/src/main.py";
-    finalString += binningString;
-    finalString += reflections_num_string;
-    finalString += lightColorString;
-
-    QMessageBox msgBox;
-    msgBox.setText(finalString);
-    msgBox.setTextInteractionFlags(Qt::TextSelectableByMouse);
-    msgBox.exec();
-    system(finalString.toStdString().c_str());
+    QString systemCallCommand = prepareSystemCallCommand(binningString, reflectionsNumString, lightColorString);
+    system(systemCallCommand.toStdString().c_str());
 }
 
 
@@ -157,6 +112,75 @@ void TRAK_MainWindow::toggleBinningTable(bool show)
     ui->color_550_label->setVisible(show);
     ui->color_520_label->setVisible(show);
     ui->color_490_label->setVisible(show);
+}
+
+QString TRAK_MainWindow::getBinningParameterString()
+{
+    bool binning = ui->binningCheckBox->isChecked();
+    QString binningString = " --use_binning=";
+    if (binning)
+    {
+        binningString += "True";
+    }
+    else
+    {
+        binningString += "False";
+    }
+
+    return binningString;
+}
+
+QString TRAK_MainWindow::getReflectionsNumParameterString()
+{
+    int reflections_num = ui->NumOfReflectionsSlider->value();
+    if (reflections_num < 0 || reflections_num > 10)
+    {
+        return QString("");
+    }
+    QString reflections_num_string = " --reflections_num=" + QString::number(reflections_num);
+    return reflections_num_string;
+}
+
+QString TRAK_MainWindow::getLightColorParameterString()
+{
+    bool binning = ui->binningCheckBox->isChecked();
+    QString color400String = sliderValueToQString(ui->color_400_valueSlider->value());
+    QString color430String = sliderValueToQString(ui->color_430_valueSlider->value());
+    QString color460String = sliderValueToQString(ui->color_460_valueSlider->value());
+    QString color490String = sliderValueToQString(ui->color_490_valueSlider->value());
+    QString color520String = sliderValueToQString(ui->color_520_valueSlider->value());
+    QString color550String = sliderValueToQString(ui->color_550_valueSlider->value());
+    QString color580String = sliderValueToQString(ui->color_580_valueSlider->value());
+    QString color610String = sliderValueToQString(ui->color_610_valueSlider->value());
+    QString color640String = sliderValueToQString(ui->color_640_valueSlider->value());
+    QString color670String = sliderValueToQString(ui->color_670_valueSlider->value());
+
+    QString lightColorString = " --light_color=";
+    lightColorString += color400String + ",";
+    lightColorString += color430String + ",";
+    lightColorString += color460String;
+    if (binning)
+    {
+        lightColorString += ",";
+        lightColorString += color490String + ",";
+        lightColorString += color520String + ",";
+        lightColorString += color550String + ",";
+        lightColorString += color580String + ",";
+        lightColorString += color610String + ",";
+        lightColorString += color640String + ",";
+        lightColorString += color670String;
+    }
+
+    return lightColorString;
+}
+
+QString TRAK_MainWindow::prepareSystemCallCommand(QString &binning, QString &reflectionsNum, QString &lightColor)
+{
+    QString systemCallCommand = "python " + QDir::currentPath() + "/simple-rt/src/main.py";
+    systemCallCommand += binning;
+    systemCallCommand += reflectionsNum;
+    systemCallCommand += lightColor;
+    return systemCallCommand;
 }
 
 

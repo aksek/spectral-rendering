@@ -44,10 +44,15 @@ private slots:
 
 private:
     Ui::TRAK_MainWindow *ui;
-    QString sliderValueToQString(int value);
 
+    QString sliderValueToQString(int value);
     void showBinningTable();
     void showNonBinningTable();
     void toggleBinningTable(bool show);
+
+    QString getBinningParameterString();
+    QString getReflectionsNumParameterString();
+    QString getLightColorParameterString();
+    QString prepareSystemCallCommand(QString& binning, QString& reflectionsNum, QString& lightColor);
 };
 #endif // TRAK_MAINWINDOW_H

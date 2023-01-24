@@ -4,7 +4,7 @@
 #define INFTY 9999
 
 #define N_TRIANGLES 12
-#define N_BUCKETS 11
+#define N_BUCKETS 10
 
 in vec3 fragPosition;
 
@@ -14,15 +14,15 @@ uniform vec3 res;
 uniform vec3 cameraPosition;
 
 uniform float cameraAngle;
-uniform float[N_BUCKETS] leftTetrahedronColor;
-uniform float[N_BUCKETS] rightTetrahedronColor;
-uniform float[N_BUCKETS] wallsColor;
-uniform float[N_BUCKETS] lightColor;
+uniform float leftTetrahedronColor[N_BUCKETS];
+uniform float rightTetrahedronColor[N_BUCKETS];
+uniform float wallsColor[N_BUCKETS];
+uniform float lightColor[N_BUCKETS];
 
 struct Light
 {
     vec3 position;
-    float[N_BUCKETS] color;
+    float color[N_BUCKETS];
     float intensity;
 };
 
@@ -31,7 +31,7 @@ struct Triangle
 	vec3 vertex0;
 	vec3 vertex1;
 	vec3 vertex2;
-    float[N_BUCKETS] color;
+    float color[N_BUCKETS];
 };
 
 struct Ray
@@ -45,7 +45,7 @@ struct HitData
 	float rayLength;
 	vec3 normal;
     vec3 pointHit;
-    float[N_BUCKETS] materialColor;
+    float materialColor[N_BUCKETS];
 };
 
 HitData TriangleRayIntersection(vec3 rayOrigin, vec3 rayVector, Triangle triangle);
@@ -60,10 +60,10 @@ float[N_BUCKETS] bucketMul(float[N_BUCKETS] first, float[N_BUCKETS] second);
 
 void main()
 {
-    float[N_BUCKETS] leftTetrahedronColor = float[N_BUCKETS](0.1, 0.1, 0.2, 0, 0, 0, 0.6, 0.8, 0.9, 0.8, 0.9);
-    float[N_BUCKETS] rightTetrahedronColor = float[N_BUCKETS](0.1, 0.1, 0.2, 0, 0.8, 0.9, 0.6, 0.1, 0.1, 0, 0.9);
-    float[N_BUCKETS] wallsColor = float[N_BUCKETS](1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
-    float[N_BUCKETS] lightColor = float[N_BUCKETS](1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+//    float[N_BUCKETS] leftTetrahedronColor = float[N_BUCKETS](0.1, 0.1, 0.2, 0, 0, 0, 0.6, 0.8, 0.9, 0.8);
+//    float[N_BUCKETS] rightTetrahedronColor = float[N_BUCKETS](0.1, 0.1, 0.2, 0, 0.8, 0.9, 0.6, 0.1, 0.1, 0);
+//    float[N_BUCKETS] wallsColor = float[N_BUCKETS](1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+//    float[N_BUCKETS] lightColor = float[N_BUCKETS](1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
 
     vec2 resolution = vec2(res);
 
@@ -161,7 +161,7 @@ void main()
 
     mat3 I = mat3(vec3(1, 0, 0), vec3(0, 1, 0), vec3(0, 0, 1));
     mat3 K = mat3(vec3(0, 0, 1), vec3(0, 0, 0), vec3(-1,0, 0));
-    mat3 cameraRotation = cos(radians(cameraAngle[0])) * I + (1 - cos(radians(cameraAngle[0]))) * outerProduct(u, u) + sin(radians(cameraAngle[0])) * uMatrix;
+    mat3 cameraRotation = cos(radians(cameraAngle)) * I + (1 - cos(radians(cameraAngle))) * outerProduct(u, u) + sin(radians(cameraAngle)) * uMatrix;
     // mat3 cameraRotation = K + sin(radians(cameraAngle[0])) * K + (1 - cos(radians(cameraAngle[0]))) * matrixCompMult(K, K);
 
 
@@ -181,7 +181,7 @@ void main()
 float[N_BUCKETS] traceRay(vec3 rayOrigin, vec3 rayVector, Triangle triangles[N_TRIANGLES], Light light, int hitNumber) {
     vec3 ambient = vec3(0.01, 0.01, 0.05);
 
-    float[N_BUCKETS] color = float[N_BUCKETS](0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    float[N_BUCKETS] color = float[N_BUCKETS](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     for (int j = hitNumber; j >= 0; j--) {
 
         HitData detectedHit;
